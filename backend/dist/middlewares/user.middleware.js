@@ -1,6 +1,7 @@
-import { emailRegex, passwordRegex } from "../utils/regex.js";
 import Joi from "joi";
+import { emailRegex, passwordRegex } from "../utils/regex.js";
 import { ResponseError } from "../utils/customClasses.js";
+import { CONSTANTS } from "../utils/constants.js";
 const nameSchema = Joi.string().trim().min(3).max(30).required();
 const emailSchema = Joi.string()
     .trim()
@@ -24,7 +25,7 @@ export const validateUserSignup = async (req, res, next) => {
         const value = await schema.validateAsync(req.body);
         if (value.error) {
             return res.status(400).json({
-                status: "error",
+                status: CONSTANTS.FAILURE,
                 message: value.error.message,
             });
         }
@@ -34,7 +35,7 @@ export const validateUserSignup = async (req, res, next) => {
         console.log(error);
         return res
             .status(error.code)
-            .json({ status: "Failure", errorMessage: error.message, data: null });
+            .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
     }
 };
 export const validateUserSignin = async (req, res, next) => {
@@ -46,7 +47,7 @@ export const validateUserSignin = async (req, res, next) => {
         const value = await schema.validateAsync(req.body);
         if (value.error) {
             return res.status(400).json({
-                status: "error",
+                status: CONSTANTS.FAILURE,
                 message: value.error.message,
             });
         }
@@ -54,7 +55,17 @@ export const validateUserSignin = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({ status: "Failure", errorMessage: error.message, data: null });
+        return res
+            .status(500)
+            .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
     }
+};
+export const clearCookieFn = async (req, res, next) => {
+    res.clearCookie(CONSTANTS.COOKIE_NAME, {
+        httpOnly: true,
+        domain: CONSTANTS.DOMAIN,
+        signed: true,
+    });
+    next();
 };
 //# sourceMappingURL=user.middleware.js.map
