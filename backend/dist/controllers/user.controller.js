@@ -20,7 +20,7 @@ export const signupUserFn = async (req, res, next) => {
         const { name, email, password } = req.body;
         const user = await UserModel.findOne({ email });
         if (user) {
-            let err = new ResponseError("User already exists");
+            let err = new ResponseError("User already exists", 400);
             throw err;
         }
         const obj = { name, email };
@@ -50,7 +50,7 @@ export const signupUserFn = async (req, res, next) => {
     catch (error) {
         console.log(error);
         res
-            .status(error.code)
+            .status(error.code || 500)
             .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
     }
 };
@@ -59,7 +59,7 @@ export const signinUserFn = async (req, res, next) => {
         const { email, password: pwd } = req.body;
         const user = await UserModel.findOne({ email });
         if (!user?._id) {
-            let err = new ResponseError("User not found.", 401);
+            let err = new ResponseError("User not registered or token malfunctioned", 401);
             throw err;
         }
         const validatePassword = await bcrypt.compare(pwd, user.password);
@@ -87,12 +87,37 @@ export const signinUserFn = async (req, res, next) => {
         const returnedUser = JSON.parse(JSON.stringify(user));
         // delete password from the returned user object
         delete returnedUser.password;
+        delete returnedUser.__v;
         res.status(200).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: returnedUser });
     }
     catch (error) {
         console.log(error);
         res
-            .status(error.code)
+            .status(error.code || 500)
+            .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
+    }
+};
+export const checkAuthStatus = async (req, res, next) => {
+    try {
+        const user = await UserModel.findById(res.locals.user.id);
+        if (!user?._id) {
+            let err = new ResponseError("User not registered or token malfunctioned", 401);
+            throw err;
+        }
+        if (user?._id.toString() !== res.locals.user.id) {
+            let err = new ResponseError("Permission denied!", 403);
+            throw err;
+        }
+        const returnedUser = JSON.parse(JSON.stringify(user));
+        // delete password and document version from the returned user object
+        delete returnedUser.password;
+        delete returnedUser.__v;
+        res.status(200).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: returnedUser });
+    }
+    catch (error) {
+        console.log(error);
+        res
+            .status(error.code || 500)
             .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
     }
 };

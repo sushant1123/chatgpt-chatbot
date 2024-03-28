@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import CustomLink from "./shared/CustomLink";
 
 const Header = () => {
-  const logoutUserFn = useAuth()?.logoutUserFn;
+  const logoutUser = useAuth()?.logoutUserFn;
   const isLoggedIn = useAuth()?.isLoggedIn;
 
   const navItemsLoggedIn = [
@@ -19,7 +19,7 @@ const Header = () => {
       textColor: "white",
       to: "/",
       text: "logout",
-      onClick: () => logoutUserFn,
+      onClick: logoutUser,
     },
   ];
 

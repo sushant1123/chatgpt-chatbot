@@ -1,8 +1,10 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
+import { checkAuthStatus, loginUser } from "../helpers/api-helpers";
 
 type User = {
   name: string;
   email: string;
+  id: string;
 };
 
 type AuthContextType = {
@@ -20,10 +22,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const signinUserFn = async (email: string, password: string) => {
-    try {
-      console.log({ email, password });
-    } catch (error) {
-      console.log("Error signing in user: ", error);
+    const respData = await loginUser(email, password);
+
+    if (respData.status === "Success") {
+      const data2 = respData.data;
+      setUser({ email: data2?.email, name: data2?.name, id: data2?._id });
+      setIsLoggedIn(true);
     }
   };
 
@@ -40,9 +44,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // check if user cookies are valid or not
-    // if valid, set isLoggedIn to true and setUser with user data
-    // if not valid, set isLoggedIn to false and setUser to null
+    const checkStatus = async () => {
+      const respData = await checkAuthStatus();
+
+      if (respData.status === "Success") {
+        const data2 = respData.data;
+        setUser({ email: data2?.email, name: data2?.name, id: data2?._id });
+        setIsLoggedIn(true);
+      }
+    };
+
+    checkStatus();
   }, []);
 
   const authProviderValue = {

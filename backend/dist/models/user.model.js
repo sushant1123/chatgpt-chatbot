@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-const { ObjectId } = mongoose.Schema.Types;
+import { chatSchema } from "./chat.model.js";
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
-    chats: [{ type: ObjectId, ref: "Chat" }],
+    chats: [chatSchema],
 }, { timestamps: true });
 export const UserModel = mongoose.model("User", userSchema);
 //# sourceMappingURL=user.model.js.map

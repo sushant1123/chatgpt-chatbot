@@ -1,16 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosLogIn } from "react-icons/io";
 import { Box, Button, Typography } from "@mui/material";
 import { toast } from "react-hot-toast";
 
+import { CONSTANTS } from "../utils/constants";
 import { useAuth } from "../context/AuthContext";
 import CustomInput from "../components/shared/CustomInput";
 
 import AIRobotImg from "../../public/airobot.png";
 
 const Login = () => {
-  const navigate = useNavigate();
   const auth = useAuth();
 
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -21,20 +21,14 @@ const Login = () => {
     const password = formData.get("password") as string;
 
     try {
-      toast.loading("Signing In", { id: "login" });
+      toast.loading("Signing In", { id: CONSTANTS.LOGIN });
       await auth?.signinUserFn(email, password);
-      toast.success("Signed In Successfully", { id: "login" });
+      toast.success("Signed In Successfully", { id: CONSTANTS.LOGIN });
     } catch (error) {
       console.log(error);
-      toast.error("Signing In Failed", { id: "login" });
+      toast.error("Signing In Failed", { id: CONSTANTS.LOGIN });
     }
   };
-
-  useEffect(() => {
-    if (auth?.isLoggedIn) {
-      navigate("/");
-    }
-  }, []);
 
   return (
     <Box width={"100%"} height={"100%"} display="flex" flex={1}>

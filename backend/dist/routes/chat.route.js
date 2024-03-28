@@ -1,7 +1,8 @@
 import { Router } from "express";
+import { checkTokenStatus } from "../middlewares/user.middleware.js";
+import { validateCreateNewChatFn } from "../middlewares/chat.middleware.js";
+import { generateChatCompletion } from "../controllers/chat.controller.js";
 const chatRouter = Router();
-chatRouter.get("/", (req, res) => {
-    return res.status(200).json({ status: "success", message: "Welcome to the chats route" });
-});
+chatRouter.post("/new", validateCreateNewChatFn, checkTokenStatus, generateChatCompletion);
 export default chatRouter;
 //# sourceMappingURL=chat.route.js.map

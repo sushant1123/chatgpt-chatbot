@@ -3,6 +3,7 @@ import Joi from "joi";
 import { emailRegex, passwordRegex } from "../utils/regex.js";
 import { ResponseError } from "../utils/customClasses.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { verifyToken } from "../utils/token-manager.js";
 
 const nameSchema = Joi.string().trim().min(3).max(30).required();
 const emailSchema = Joi.string()
@@ -43,7 +44,7 @@ export const validateUserSignup = async (req: Request, res: Response, next: Next
   } catch (error) {
     console.log(error);
     return res
-      .status(error.code)
+      .status(error.code || 500)
       .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
   }
 };
@@ -80,4 +81,25 @@ export const clearCookieFn = async (req: Request, res: Response, next: NextFunct
     signed: true,
   });
   next();
+};
+
+export const checkTokenStatus = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.signedCookies[CONSTANTS.COOKIE_NAME];
+
+    if (!token || token.trim() === "") {
+      throw new ResponseError("Token not received.", 401);
+    }
+
+    const data = verifyToken(token);
+
+    res.locals.user = data;
+
+    next();
+  } catch (error) {
+    console.log("checkTokenStatusError", error);
+    return res
+      .status(error.code || 500)
+      .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
+  }
 };
