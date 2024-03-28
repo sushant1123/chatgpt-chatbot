@@ -69,3 +69,25 @@ export const sendChatsToUser = async (req: Request, res: Response, next: NextFun
       .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
   }
 };
+
+export const deleteChats = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //user token check
+    const user = await UserModel.findById(res.locals.user.id);
+    if (!user) {
+      throw new ResponseError("User not registered OR Token malfunctioned");
+    }
+    if (user._id.toString() !== res.locals.user.id) {
+      throw new ResponseError("Permissions didn't match", 403);
+    }
+    //@ts-ignore
+    user.chats = [];
+    await user.save();
+    return res.status(200).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: null });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(error.code || 500)
+      .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
+  }
+};
