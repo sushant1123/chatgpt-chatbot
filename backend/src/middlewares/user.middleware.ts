@@ -8,8 +8,8 @@ import { verifyToken } from "../utils/token-manager.js";
 const nameSchema = Joi.string().trim().min(3).max(30).required();
 const emailSchema = Joi.string()
   .trim()
-  .required()
   .pattern(new RegExp(emailRegex))
+  .required()
   .error(new ResponseError("Invalid email"));
 const passwordSchema = Joi.string()
   .trim()

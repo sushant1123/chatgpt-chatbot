@@ -5,7 +5,7 @@ import { UserModel } from "../models/user.model.js";
 import { ResponseError } from "../utils/customClasses.js";
 import { configureOpenAI } from "../configs/openai.config.js";
 
-export const generateChatCompletion = async (req: Request, res: Response) => {
+export const generateChatCompletionFn = async (req: Request, res: Response) => {
   try {
     const { prompt } = req.body;
 
@@ -48,7 +48,7 @@ export const generateChatCompletion = async (req: Request, res: Response) => {
   }
 };
 
-export const sendChatsToUser = async (req: Request, res: Response, next: NextFunction) => {
+export const sendChatsToUserFn = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //user token check
     const user = await UserModel.findById(res.locals.user.id);
@@ -70,7 +70,7 @@ export const sendChatsToUser = async (req: Request, res: Response, next: NextFun
   }
 };
 
-export const deleteChats = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteChatsFn = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //user token check
     const user = await UserModel.findById(res.locals.user.id);
@@ -83,7 +83,9 @@ export const deleteChats = async (req: Request, res: Response, next: NextFunctio
     //@ts-ignore
     user.chats = [];
     await user.save();
-    return res.status(200).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: null });
+    return res
+      .status(200)
+      .json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: "Chats deleted successfully." });
   } catch (error) {
     console.log(error);
     return res

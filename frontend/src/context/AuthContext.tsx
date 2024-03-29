@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
-import { checkAuthStatus, loginUser } from "../helpers/api-helpers";
+import { checkAuthStatus, loginUser, logoutUser, signupUser } from "../helpers/api-helpers";
 
 type User = {
   name: string;
@@ -32,15 +32,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signupUserFn = async (name: string, email: string, password: string) => {
-    try {
-      console.log({ name, email, password });
-    } catch (error) {
-      console.log("Error signing up user: ", error);
+    const respData = await signupUser(name, email, password);
+    if (respData.status === "Success") {
+      const data2 = respData.data;
+      setUser({ email: data2?.email, name: data2?.name, id: data2?._id });
+      setIsLoggedIn(true);
     }
   };
 
   const logoutUserFn = async () => {
+    await logoutUser();
     setIsLoggedIn(false);
+    setUser(null);
+
+    window.location.reload();
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosLogIn } from "react-icons/io";
 import { Box, Button, Typography } from "@mui/material";
@@ -12,6 +12,7 @@ import AIRobotImg from "../../public/airobot.png";
 
 const Login = () => {
   const auth = useAuth();
+  const navigate = useNavigate();
 
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,6 +30,12 @@ const Login = () => {
       toast.error("Signing In Failed", { id: CONSTANTS.LOGIN });
     }
   };
+
+  useEffect(() => {
+    if (auth?.user) {
+      return navigate("/chat");
+    }
+  }, [auth]);
 
   return (
     <Box width={"100%"} height={"100%"} display="flex" flex={1}>

@@ -1,57 +1,84 @@
-import { useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
 import red from "@mui/material/colors/red";
 import { IoMdSend } from "react-icons/io";
+import { toast } from "react-hot-toast";
 
 import ChatItem from "../components/chat/ChatItem";
 import { useAuth } from "../context/AuthContext";
+import { sendChatRequest, deleteUserChats, getUserChats } from "../helpers/api-helpers";
+import { CONSTANTS } from "../utils/constants";
+// import { messages } from "../assets/mockData";
+
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 const Chat = () => {
   const auth = useAuth();
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [chatMessages, setChatMessages] = useState([
-    {
-      content: "Hello",
-      role: "user",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "assistant",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "assistant",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "user",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "user",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "user",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "user",
-    },
-    {
-      content: "Hello, I am a ChatBOT. How can I help you?",
-      role: "user",
-    },
-    {
-      content:
-        "Hello, I am a ChatBOT. How can I help you? ksdbjkbsdsdjkb bf f erwerwer  roweiwirw ryweyr ryerywe8yrweyr 8yr8eyr",
-      role: "assistant",
-    },
-  ]);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
 
-  const handleDeleteChats = async () => {};
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {};
+  const handleDeleteChats = async () => {
+    try {
+      toast.loading("Deleting Chats", { id: CONSTANTS.DELETE_CHAT });
+      await deleteUserChats();
+      setChatMessages([]);
+      toast.success("Deleted Chats Successfully", { id: CONSTANTS.DELETE_CHAT });
+    } catch (error) {
+      console.log(error);
+      toast.error("Deleting chats failed", { id: CONSTANTS.DELETE_CHAT });
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      toast.loading("Creating chat", { id: CONSTANTS.CREATE_CHAT });
+
+      const content = inputRef.current?.value as string;
+
+      if (inputRef && inputRef.current) {
+        inputRef.current.value = "";
+      }
+
+      const newMessage: Message = { role: "user", content };
+      setChatMessages((prev) => [...prev, newMessage]);
+
+      const chatData = await sendChatRequest(content);
+      setChatMessages([...chatData.data]);
+
+      toast.success("Chat created Successfully", { id: CONSTANTS.CREATE_CHAT });
+    } catch (error) {
+      console.log(error);
+      toast.error("Chat creation Failed", { id: CONSTANTS.CREATE_CHAT });
+    }
+  };
+
+  // to fetch all the user chats
+  useLayoutEffect(() => {
+    if (auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading chats...", { id: CONSTANTS.FETCH_CHAT });
+      getUserChats()
+        .then((data) => {
+          setChatMessages([...data.data]);
+          toast.success("Successfully loaded chats", { id: CONSTANTS.FETCH_CHAT });
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Failed to load chats", { id: CONSTANTS.FETCH_CHAT });
+        });
+    }
+  }, [auth]);
+
+  useEffect(() => {
+    if (!auth?.user) {
+      navigate("/login");
+    }
+  }, [auth]);
 
   return (
     <Box

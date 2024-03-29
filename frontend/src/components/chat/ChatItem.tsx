@@ -3,7 +3,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { useAuth } from "../../context/AuthContext";
-import OpenAIImg from "../../../public/openai.jpg";
+import OpenAILogo from "../../../public/openai.jpg";
 
 function extractCodeFromString(message: string) {
   if (message.includes("```")) {
@@ -42,7 +42,7 @@ const ChatItem = ({ content, role }: { content: string; role: "user" | "assistan
       }}
     >
       <Avatar sx={{ ml: "0" }}>
-        <img src={OpenAIImg} alt="openai" width={"30px"} />
+        <img src={OpenAILogo} alt="openai" width={"30px"} />
       </Avatar>
       <Box>
         {!messageBlocks && <Typography sx={{ fontSize: "20px" }}>{content}</Typography>}

@@ -1,1 +1,0 @@
-{"version":3,"file":"customInterfaces.js","sourceRoot":"","sources":["../../src/utils/customInterfaces.ts"],"names":[],"mappings":"AAOA,MAAM,OAAO,aAAc,SAAQ,KAAK;IACF;IAApC,YAAY,OAAe,EAAS,IAAa;QAC/C,KAAK,CAAC,OAAO,CAAC,CAAC;QADmB,SAAI,GAAJ,IAAI,CAAS;QAE/C,IAAI,CAAC,IAAI,GAAG,IAAI,IAAI,GAAG,CAAC;IAC1B,CAAC;CACF"}

@@ -54,7 +54,12 @@ export const signupUserFn = async (req: Request, res: Response, next: NextFuncti
       path: "/",
     });
 
-    res.status(201).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: resp._id });
+    const returnedUser = JSON.parse(JSON.stringify(resp));
+    // delete password from the returned user object
+    delete returnedUser.password;
+    delete returnedUser.__v;
+
+    res.status(201).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: returnedUser });
   } catch (error) {
     console.log(error);
     res
@@ -113,7 +118,7 @@ export const signinUserFn = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const checkAuthStatus = async (req: Request, res: Response, next: NextFunction) => {
+export const checkAuthStatusFn = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await UserModel.findById(res.locals.user.id);
 
@@ -136,6 +141,33 @@ export const checkAuthStatus = async (req: Request, res: Response, next: NextFun
   } catch (error) {
     console.log(error);
     res
+      .status(error.code || 500)
+      .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
+  }
+};
+
+export const userLogoutFn = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //user token check
+    const user = await UserModel.findById(res.locals.user.id);
+    if (!user) {
+      throw new ResponseError("User not registered OR Token malfunctioned");
+    }
+    if (user._id.toString() !== res.locals.user.id) {
+      throw new ResponseError("Permissions didn't match");
+    }
+
+    res.clearCookie(CONSTANTS.COOKIE_NAME, {
+      httpOnly: true,
+      domain: "localhost",
+      signed: true,
+      path: "/",
+    });
+
+    return res.status(200).json({ status: CONSTANTS.SUCCESS, errorMessage: null, data: null });
+  } catch (error) {
+    console.log(error);
+    return res
       .status(error.code || 500)
       .json({ status: CONSTANTS.FAILURE, errorMessage: error.message, data: null });
   }
